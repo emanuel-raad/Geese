@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import Color
-from Geese import SnowGoose
+from Geese import Sheep
 import threading
 import time
 
@@ -25,17 +25,17 @@ class FindWhiteGoose:
 
     def run(self):
         #Filters a contour array by low bound
-
-        frame = cv2.imread('test.jpg', 1)
+        print('ok')
+        frame = cv2.imread('log.jpg', 1)
 
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-        mask = cv2.inRange(hsv, SnowGoose().lower, SnowGoose().upper)
+        mask = cv2.inRange(hsv, Sheep().lower, Sheep().upper)
         res = cv2.bitwise_and(frame, frame, mask=mask)
         res = cv2.GaussianBlur(res, (5, 5), 0)
 
-        kernel = np.ones((7, 7), np.uint8)
-        erosion = cv2.erode(res, kernel, iterations=2)
+        kernel = np.ones((5, 5), np.uint8)
+        erosion = cv2.erode(res, kernel, iterations=0)
         im = cv2.cvtColor(erosion, cv2.COLOR_BGR2GRAY)
 
         # Use canny edge to find outline after erosion
@@ -43,15 +43,17 @@ class FindWhiteGoose:
 
         # Dilate the lines to join them and form one contour
         kernelDilate = np.ones((5, 5), np.uint8)
-        edges = cv2.dilate(edges, kernel, iterations=1)
+        edges = cv2.dilate(edges, kernelDilate, iterations=0)
 
-        cv2.imshow('edges', edges)
+        edges = cv2.imread('log.jpg', 1)
+
+        #cv2.imread('edges', edges)
 
         # Finds the contours. Use cv2.RETR_EXTERNAL to only get the outer contour for the thick edge
-        imgContours, contours, h = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        imgContours, contours, h = cv2.findContours(edges)
 
         # Only keep areas above 10,000
-        MIN_AREA = 10000
+        MIN_AREA = 1
         filteredContours = filterAreaLow(contours, MIN_AREA)
 
         # Draws each contour
